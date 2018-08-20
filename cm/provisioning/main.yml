@@ -24,3 +24,4 @@
     - role: apt
     - role: ntp
     - role: postgresql
+    - role: nodejs

@@ -1,13 +1,41 @@
+# frozen_string_literal: true
+
 module Types
   class QueryType < Types::BaseObject
-    # Add root-level fields here.
-    # They will be entry points for queries on your schema.
 
-    # TODO: remove me
-    field :test_field, String, null: false,
-      description: "An example field added by the generator"
-    def test_field
-      "Hello World!"
+    field :accounts, [AccountType], null: false do
+      description 'Return all accounts'
+    end
+
+    def accounts
+      Account.all
+    end
+
+    field :balance, Float, null: false do
+      argument :number, String, required: true
+    end
+
+    def balance(number:)
+      AccountService.balance(number)
+    end
+
+    field :balance_by_date, Float, null: false do
+      argument :number, String, required: true
+      argument :date, String, required: true
+    end
+
+    def balance_by_date(number:, date:)
+      AccountService.balance_by_date(number, date)
+    end
+
+    field :turnover, String, null: false do
+      argument :number, String, required: true
+      argument :datestart, String, required: true
+      argument :datefinish, String, required: true
+    end
+
+    def turnover(number:, datestart:, datefinish:)
+      AccountService.turnover(number, datestart, datefinish)
     end
   end
 end

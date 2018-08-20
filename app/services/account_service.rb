@@ -18,6 +18,10 @@ class AccountService
     new.balance(number)
   end
 
+  def self.balance_by_date(number, date)
+    new.balance_by_date(number, date)
+  end
+
   def self.turnover(number, date_start, date_finish)
     new.turnover(number, date_start, date_finish)
   end
@@ -31,9 +35,15 @@ class AccountService
       account_to.update!(balance: account_to.balance + amount)
       Transaction.transaction do
         Transaction
-        .create(account_id: account_from.id, to: to, amount: amount, type_operation: 'credit')
+          .create(account_id: account_from.id,
+                  to: to,
+                  amount: amount,
+                  type_operation: 'credit')
         Transaction
-        .create(account_id: account_to.id, from: from, amount: amount, type_operation: 'debit')
+          .create(account_id: account_to.id,
+                  from: from,
+                  amount: amount,
+                  type_operation: 'debit')
       end
     end
   end
@@ -45,7 +55,9 @@ class AccountService
       account.update!(balance: balance + amount)
       Transaction.transaction do
         Transaction
-        .create(account_id: account.id, amount: amount, type_operation: 'debit')
+          .create(account_id: account.id,
+                  amount: amount,
+                  type_operation: 'debit')
       end
     end
   end
@@ -58,7 +70,9 @@ class AccountService
       account.update!(balance: balance - amount)
       Transaction.transaction do
         Transaction
-        .create(account_id: account.id, amount: amount, type_operation: 'credit')
+          .create(account_id: account.id,
+                  amount: amount,
+                  type_operation: 'credit')
       end
     end
   end
@@ -70,21 +84,29 @@ class AccountService
 
   def balance_by_date(number, date)
     account_id = account(number).id
-    date = Time.parse(date)
-    Transaction
-      .where("created_at <= ? AND account_id = ?)", date, account_id )
-      .group_by(&:type_operation)
-      .sum(:amount)
+    date = Time.parse(date).tomorrow.strftime('%Y-%m-%d')
+    total_turnover = Transaction
+                     .where('created_at < ? AND account_id = ?',
+                            date,
+                            account_id)
+                     .group(:type_operation)
+                     .sum(:amount)
+    debit = total_turnover['debit'] || 0.0
+    credit = total_turnover['credit'] || 0.0
+    debit - credit
   end
 
   def turnover(number, date_start, date_finish)
     account_id = account(number).id
-    start = Time.parse(date_start)
-    finish = Time.parse(date_finish)
+    start = Time.parse(date_start).strftime('%Y-%m-%d')
+    finish = Time.parse(date_finish).tomorrow.strftime('%Y-%m-%d')
     result = Transaction
-      .where("created_at >= ? AND created_at <= ? AND account_id = ?)", start, finish, account_id )
-      .group_by(&:type_operation)
-    result.each_with_object({}) do |(k,v), memo|
+             .where('created_at >= ? AND created_at < ? AND account_id = ?',
+                    start,
+                    finish,
+                    account_id)
+             .group_by(&:type_operation)
+    result.each_with_object({}) do |(k, v), memo|
       memo[k] = v.map(&:attributes)
     end
   end
