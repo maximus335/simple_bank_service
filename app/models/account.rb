@@ -7,12 +7,13 @@ class Account < ApplicationRecord
                       with: /\A[0-9]*\Z/,
                       message: 'the account number must consist of 20 digits'
 
-  has_many :transactions, dependent: :delete_all
+  has_many :transactions, dependent: :destroy
 
   def self.open
     account = new
     account.number = generate_number
     account.save
+    account
   end
 
   def self.generate_number

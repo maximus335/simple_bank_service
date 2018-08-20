@@ -7,16 +7,8 @@ module Types
       description 'Return all accounts'
     end
 
-    def accounts
-      Account.all
-    end
-
     field :balance, Float, null: false do
       argument :number, String, required: true
-    end
-
-    def balance(number:)
-      AccountService.balance(number)
     end
 
     field :balance_by_date, Float, null: false do
@@ -24,18 +16,26 @@ module Types
       argument :date, String, required: true
     end
 
+    field :turnover, TurnoverType, null: false do
+      argument :number, String, required: true
+      argument :start, String, required: true
+      argument :finish, String, required: true
+    end
+
+    def accounts
+      Account.all
+    end
+
+    def balance(number:)
+      AccountService.balance(number)
+    end
+
     def balance_by_date(number:, date:)
       AccountService.balance_by_date(number, date)
     end
 
-    field :turnover, String, null: false do
-      argument :number, String, required: true
-      argument :datestart, String, required: true
-      argument :datefinish, String, required: true
-    end
-
-    def turnover(number:, datestart:, datefinish:)
-      AccountService.turnover(number, datestart, datefinish)
+    def turnover(number:, start:, finish:)
+      AccountService.turnover(number, start, finish)
     end
   end
 end

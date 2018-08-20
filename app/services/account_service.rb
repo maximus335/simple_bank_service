@@ -44,6 +44,7 @@ class AccountService
                   from: from,
                   amount: amount,
                   type_operation: 'debit')
+        transfer_result(account_from, account_to)
       end
     end
   end
@@ -60,6 +61,7 @@ class AccountService
                   type_operation: 'debit')
       end
     end
+    account.reload
   end
 
   def credit(number, amount)
@@ -75,6 +77,7 @@ class AccountService
                   type_operation: 'credit')
       end
     end
+    account.reload
   end
 
   def balance(number)
@@ -112,6 +115,13 @@ class AccountService
   end
 
   private
+
+  def transfer_result(account_from, account_to)
+    {
+      from: account_from.reload,
+      to: account_to.reload
+    }
+  end
 
   def account(number)
     account = Account.find_by(number: number)
