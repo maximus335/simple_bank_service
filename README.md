@@ -12,7 +12,7 @@
 5. Отображать остаток по счету на произвольную дату
 6. Отображать оборот по счету за произвольный период
 
-Установка и запуск для разработки
+Установка и запуск для проверки
 -------------
 - Установите [VirtualBox](https://www.virtualbox.org/wiki/Downloads)
 - Установите [Vagrant](https://www.vagrantup.com/downloads.html)
@@ -27,7 +27,7 @@
 
 Выполните `vagrant ssh`, а затем `bundle install` для установки гемов.
 
-Выполните rails:db:migrate
+Выполните rails db:migrate
 
 Для заполнения базы тестовыми `счетами` выполниет rails db:seed
 
