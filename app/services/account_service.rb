@@ -33,20 +33,16 @@ class AccountService
     Account.transaction do
       account_from.update!(balance: account_from.balance - amount)
       account_to.update!(balance: account_to.balance + amount)
-      Transaction.transaction do
-        Transaction
-          .create(account_id: account_from.id,
-                  to: to,
-                  amount: amount,
-                  type_operation: 'credit')
-        Transaction
-          .create(account_id: account_to.id,
-                  from: from,
-                  amount: amount,
-                  type_operation: 'debit')
-        transfer_result(account_from, account_to)
-      end
+      Transaction.create(account_id: account_from.id,
+                         to: to,
+                         amount: amount,
+                         type_operation: 'credit')
+      Transaction.create(account_id: account_to.id,
+                         from: from,
+                         amount: amount,
+                         type_operation: 'debit')
     end
+    transfer_result(account_from, account_to)
   end
 
   def debit(number, amount)
@@ -54,12 +50,9 @@ class AccountService
     balance = account.balance
     Account.transaction do
       account.update!(balance: balance + amount)
-      Transaction.transaction do
-        Transaction
-          .create(account_id: account.id,
-                  amount: amount,
-                  type_operation: 'debit')
-      end
+      Transaction.create(account_id: account.id,
+                         amount: amount,
+                         type_operation: 'debit')
     end
     account.reload
   end
@@ -70,12 +63,9 @@ class AccountService
     check_balance!(amount, balance)
     Account.transaction do
       account.update!(balance: balance - amount)
-      Transaction.transaction do
-        Transaction
-          .create(account_id: account.id,
-                  amount: amount,
-                  type_operation: 'credit')
-      end
+      Transaction.create(account_id: account.id,
+                         amount: amount,
+                         type_operation: 'credit')
     end
     account.reload
   end

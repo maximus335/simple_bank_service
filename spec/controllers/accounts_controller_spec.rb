@@ -41,8 +41,8 @@ RSpec.describe AccountsController, type: :controller do
   end
 
   context 'GET #transfer' do
-    let!(:account_from) { create(:account, balance: 1000) }
-    let!(:account_to) { create(:account) }
+    let!(:account_from) { create(:account, number: '2' * 20, balance: 1000) }
+    let!(:account_to) { create(:account, number: '3' * 20) }
     subject { get :transfer, params: params }
     let(:params) { { from: account_from.number, to: account_to.number, amount: '100' } }
     it { is_expected.to be_ok }

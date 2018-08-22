@@ -11,7 +11,7 @@ port ENV.fetch('SBS_PORT') { 8029 }
 
 puma_workers     = env_value['SBS_PUMA_WORKERS', 4]
 puma_threads_min = env_value['SBS_PUMA_THREADS_MIN', 0]
-puma_threads_max = env_value['SBS_PUMA_THREADS_MAX', 8]
+puma_threads_max = env_value['SBS_PUMA_THREADS_MAX', 5]
 
 workers puma_workers
 threads puma_threads_min, puma_threads_max

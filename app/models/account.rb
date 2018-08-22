@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'securerandom'
+
 class Account < ApplicationRecord
   validates :number, length: { is: 20 },
                      uniqueness: true
@@ -17,6 +19,6 @@ class Account < ApplicationRecord
   end
 
   def self.generate_number
-    '40702840' + Time.now.strftime('%s%2N')
-  end
+    '40702840' + SecureRandom.random_number(1000000000000000000).to_s
+  end.to_s
 end

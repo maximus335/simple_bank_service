@@ -59,7 +59,7 @@ RSpec.describe Account, type: :model do
 
   describe 'validations_uniqueness' do
     context 'when number is not uniq' do
-      let(:number) { create(:number) }
+      let(:number) { '1' * 20 }
       before { create(:account, number: number) }
 
       it 'raises unique validation error number' do
