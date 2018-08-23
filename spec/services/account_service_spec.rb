@@ -33,8 +33,8 @@ RSpec.describe AccountService do
       context 'when account not found' do
         let(:number) { 'number' }
 
-        it 'should raise RuntimeError' do
-          expect { subject }.to raise_error(RuntimeError)
+        it 'should raise AccountService::Errors::NotFound' do
+          expect { subject }.to raise_error(AccountService::Errors::NotFound)
         end
       end
     end
@@ -52,8 +52,16 @@ RSpec.describe AccountService do
       context 'when account not found' do
         let(:number) { 'number' }
 
-        it 'should raise RuntimeError' do
-          expect { subject }.to raise_error(RuntimeError)
+        it 'should raise AccountService::Errors::NotFound' do
+          expect { subject }.to raise_error(AccountService::Errors::NotFound)
+        end
+      end
+
+      context 'when account is blocked' do
+        let!(:account) { create(:account, blocked: true) }
+
+        it 'should raise AccountService::Errors::Blocked' do
+          expect { subject }.to raise_error(AccountService::Errors::Blocked)
         end
       end
     end
@@ -74,8 +82,16 @@ RSpec.describe AccountService do
       context 'when account not found' do
         let(:number) { 'number' }
 
-        it 'should raise RuntimeError' do
-          expect { subject }.to raise_error(RuntimeError)
+        it 'should raise AccountService::Errors::NotFound' do
+          expect { subject }.to raise_error(AccountService::Errors::NotFound)
+        end
+      end
+
+      context 'when account is blocked' do
+        let!(:account) { create(:account, blocked: true) }
+
+        it 'should raise AccountService::Errors::Blocked' do
+          expect { subject }.to raise_error(AccountService::Errors::Blocked)
         end
       end
     end
@@ -97,16 +113,24 @@ RSpec.describe AccountService do
       context 'when account not found' do
         let(:number) { 'number' }
 
-        it 'should raise RuntimeError' do
-          expect { subject }.to raise_error(RuntimeError)
+        it 'should raise AccountService::Errors::NotFound' do
+          expect { subject }.to raise_error(AccountService::Errors::NotFound)
         end
       end
 
       context 'when insufficient funds on account' do
         let(:balance) { 50 }
 
-        it 'should raise RuntimeError' do
-          expect { subject }.to raise_error(RuntimeError)
+        it 'should raise AccountService::Errors::InsufficientFunds' do
+          expect { subject }.to raise_error(AccountService::Errors::InsufficientFunds)
+        end
+      end
+
+      context 'when account is blocked' do
+        let!(:account) { create(:account, blocked: true) }
+
+        it 'should raise AccountService::Errors::Blocked' do
+          expect { subject }.to raise_error(AccountService::Errors::Blocked)
         end
       end
     end
@@ -134,24 +158,40 @@ RSpec.describe AccountService do
       context 'when account_from not found' do
         let(:from) { 'number' }
 
-        it 'should raise RuntimeError' do
-          expect { subject }.to raise_error(RuntimeError)
+        it 'should raise AccountService::Errors::NotFound' do
+          expect { subject }.to raise_error(AccountService::Errors::NotFound)
+        end
+      end
+
+      context 'when account_from is blocked' do
+        let!(:account_from) { create(:account, blocked: true) }
+
+        it 'should raise AccountService::Errors::Blocked' do
+          expect { subject }.to raise_error(AccountService::Errors::Blocked)
         end
       end
 
       context 'when account_from not found' do
         let(:to) { 'number' }
 
-        it 'should raise RuntimeError' do
-          expect { subject }.to raise_error(RuntimeError)
+        it 'should raise AccountService::Errors::NotFound' do
+          expect { subject }.to raise_error(AccountService::Errors::NotFound)
         end
       end
 
-      context 'when insufficient funds on account' do
+      context 'when account_to is blocked' do
+        let!(:account_to) { create(:account, blocked: true) }
+
+        it 'should raise AccountService::Errors::Blocked' do
+          expect { subject }.to raise_error(AccountService::Errors::Blocked)
+        end
+      end
+
+      context 'when insufficient funds on account from' do
         let(:balance) { 50 }
 
-        it 'should raise RuntimeError' do
-          expect { subject }.to raise_error(RuntimeError)
+        it 'should raise AccountService::Errors::InsufficientFunds' do
+          expect { subject }.to raise_error(AccountService::Errors::InsufficientFunds)
         end
       end
     end
@@ -178,8 +218,8 @@ RSpec.describe AccountService do
       context 'when account not found' do
         let(:number) { 'number' }
 
-        it 'should raise RuntimeError' do
-          expect { subject }.to raise_error(RuntimeError)
+        it 'should raise AccountService::Errors::NotFound' do
+          expect { subject }.to raise_error(AccountService::Errors::NotFound)
         end
       end
     end

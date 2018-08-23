@@ -189,11 +189,11 @@ class AccountService
   #  запись счета
   # @params [String] number
   #  номер счета
-  # @raise [RuntimeError]
+  # @raise [Errors::NotFound]
   #  если запись не найдена
   def check_account!(account, number)
     return if account
-    raise "Account No. #{number} not found"
+    raise Errors::NotFound.new(number)
   end
 
   # Проверяет заблокирован или нет счет
@@ -201,11 +201,11 @@ class AccountService
   #  значение подя blocked записи счета
   # @params [String] number
   #  номер счета
-  # @raise [RuntimeError]
+  # @raise [Errors::Blocked]
   #  если счет заблокирован
   def check_bloked!(blocked, number)
     return unless blocked
-    raise "Account No. #{number} blocked"
+    raise Errors::Blocked.new(number)
   end
 
   # Проверяет достаточно ли средств на счете для совершения операции
@@ -213,10 +213,10 @@ class AccountService
   #  количесвтво для совершения операции
   # @params [Float] balance
   #  текущий баланс счета
-  # @raise [RuntimeError]
+  # @raise [Errors::InsufficientFunds]
   #  если средств на счете не достаточно
   def check_balance!(amount, balance)
     return if balance >= amount
-    raise 'Insufficient funds on account'
+    raise Errors::InsufficientFunds.new
   end
 end
