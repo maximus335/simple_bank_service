@@ -11,6 +11,7 @@ class Account < ApplicationRecord
 
   has_many :transactions, dependent: :destroy
 
+  # Созадет новую запись в БД
   def self.open
     account = new
     account.number = generate_number
@@ -18,6 +19,7 @@ class Account < ApplicationRecord
     account
   end
 
+  # Генерирует уникальное значение для номера счета
   def self.generate_number
     '40702840' + SecureRandom.random_number(1000000000000000000).to_s
   end.to_s

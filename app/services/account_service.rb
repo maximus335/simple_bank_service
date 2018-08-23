@@ -1,27 +1,74 @@
 # frozen_string_literal: true
 
+# Сервис предоставляющий методы для работы с записями счетов
 class AccountService
-
+  # Создает объект класса и переводит средства с счета на счет, возвращает
+  # записи счетов после обновления
+  # @params [String] from
+  #  номер счета для списания
+  # @params [String] to
+  #  номер счета для зачисление
+  # @params [Float] amount
+  #  количество средств для транзакции
+  # @return [Array<Account>]
+  #  обновленые записи счетов
   def self.transfer(from, to, amount)
     new.transfer(from, to, amount)
   end
 
+  # Создает объект класса и списывает средства со счета, возвращает
+  # запись счета после обновления
+  # @params [String] number
+  #  номер счета для списания
+  # @params [Float] amount
+  #  количество средств для транзакции
+  # @return [Account]
+  #  обновленая запись счета
   def self.credit(number, amount)
     new.credit(number, amount)
   end
 
+  # Создает объект класса и зачисляет средства на счет, возвращает
+  # запись счета после обновления
+  # @params [String] number
+  #  номер счета для зачисления
+  # @params [Float] amount
+  #  количество средств для транзакции
+  # @return [Account]
+  #  обновленая запись счета
   def self.debit(number, amount)
     new.debit(number, amount)
   end
 
+  # Создает объект класса и возвращает баланс счета на текущую дату
+  # @params [String] number
+  #  номер счета
+  # @return [Float]
+  #  баланс счета на текущую дату
   def self.balance(number)
     new.balance(number)
   end
 
+  # Создает объект класса и возвращает баланс счета на произвольную дату
+  # @params [String] number
+  #  номер счета
+  # @params [String] date
+  #  строка с датой
+  # @return [Float]
+  #  баланс счета на произвольную дату
   def self.balance_by_date(number, date)
     new.balance_by_date(number, date)
   end
 
+  # Создает объект класса и возвращает оборот по счету за произвольный период
+  # @params [String] number
+  #  номер счета
+  # @params [String] date_start
+  #  строка с датой начала периода
+  # @params [String] date_finish
+  #  строка с датой конца периода
+  # @return [Hash]
+  #  ассоциативный массив с данными
   def self.turnover(number, date_start, date_finish)
     new.turnover(number, date_start, date_finish)
   end
@@ -29,10 +76,14 @@ class AccountService
   def transfer(from, to, amount)
     account_from = account(from)
     account_to = account(to)
-    check_balance!(amount, account_from.balance)
     Account.transaction do
-      account_from.update!(balance: account_from.balance - amount)
-      account_to.update!(balance: account_to.balance + amount)
+      account_from.lock!
+      account_to.lock!
+      check_balance!(amount, account_from.balance)
+      account_from.balance -= amount
+      account_from.save!
+      account_to.balance += amount
+      account_to.save!
       Transaction.create(account_id: account_from.id,
                          to: to,
                          amount: amount,
@@ -47,9 +98,9 @@ class AccountService
 
   def debit(number, amount)
     account = account(number)
-    balance = account.balance
-    Account.transaction do
-      account.update!(balance: balance + amount)
+    account.with_lock do
+      account.balance += amount
+      account.save!
       Transaction.create(account_id: account.id,
                          amount: amount,
                          type_operation: 'debit')
@@ -59,10 +110,11 @@ class AccountService
 
   def credit(number, amount)
     account = account(number)
-    balance = account.balance
-    check_balance!(amount, balance)
-    Account.transaction do
-      account.update!(balance: balance - amount)
+    account.with_lock do
+      balance = account.balance
+      check_balance!(amount, balance)
+      account.balance -= amount
+      account.save!
       Transaction.create(account_id: account.id,
                          amount: amount,
                          type_operation: 'credit')
@@ -106,6 +158,13 @@ class AccountService
 
   private
 
+  # Подготавливает данные для метода transfer
+  # @param [Account] account_from
+  #  запись счета списания
+  # @param [Account] account_to
+  #  запись счета зачисления
+  # @return [Hash]
+  #  результат
   def transfer_result(account_from, account_to)
     {
       from: account_from.reload,
@@ -113,6 +172,11 @@ class AccountService
     }
   end
 
+  # Возвращает запись счета по номеру
+  # @params [String] number
+  #  номер счета
+  # @return [Account]
+  #  запись счета
   def account(number)
     account = Account.find_by(number: number)
     check_account!(account, number)
@@ -120,16 +184,37 @@ class AccountService
     account
   end
 
+  # Проверяет найдена ли запись счета
+  # @params [Account] account
+  #  запись счета
+  # @params [String] number
+  #  номер счета
+  # @raise [RuntimeError]
+  #  если запись не найдена
   def check_account!(account, number)
     return if account
     raise "Account No. #{number} not found"
   end
 
+  # Проверяет заблокирован или нет счет
+  # @params [Boolean] blocked
+  #  значение подя blocked записи счета
+  # @params [String] number
+  #  номер счета
+  # @raise [RuntimeError]
+  #  если счет заблокирован
   def check_bloked!(blocked, number)
     return unless blocked
     raise "Account No. #{number} blocked"
   end
 
+  # Проверяет достаточно ли средств на счете для совершения операции
+  # @params [Float] amount
+  #  количесвтво для совершения операции
+  # @params [Float] balance
+  #  текущий баланс счета
+  # @raise [RuntimeError]
+  #  если средств на счете не достаточно
   def check_balance!(amount, balance)
     return if balance >= amount
     raise 'Insufficient funds on account'
