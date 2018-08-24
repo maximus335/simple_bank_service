@@ -22,5 +22,5 @@ class Account < ApplicationRecord
   # Генерирует уникальное значение для номера счета
   def self.generate_number
     '40702840' + SecureRandom.random_number(1000000000000000000).to_s
-  end.to_s
+  end
 end
